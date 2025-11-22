@@ -6,10 +6,6 @@ A full-stack web application that provides intelligent, weather-based travel rec
 
 This project demonstrates the integration of modern web technologies with AI language models to create a context-aware travel planning assistant. The system analyzes current weather conditions and user preferences to generate personalized travel itineraries with detailed location information.
 
-## Architecture Diagram
-
-<img width="2075" height="1253" alt="diagram-export-22-11-2025-10_46_28-pm" src="https://github.com/user-attachments/assets/e2f9690d-3d1d-47a8-8834-428925d3f999" />
-
 ## Core Features
 
 - **AI-Powered Recommendations**: Utilizes Groq's Llama 3.3 70B model for natural language understanding and response generation
@@ -18,6 +14,12 @@ This project demonstrates the integration of modern web technologies with AI lan
 - **Voice Input**: Speech-to-text transcription using Groq Whisper API
 - **Rich Media Integration**: Google Places API for location photos and details
 - **Persistent Chat History**: Session management with localStorage persistence
+
+<img width="1300" height="1825" alt="image" src="https://github.com/user-attachments/assets/2481c398-51d5-4cc2-b126-c1b78dc15b45" />
+
+## Architecture Diagram
+
+<img width="2075" height="1253" alt="diagram-export-22-11-2025-10_46_28-pm" src="https://github.com/user-attachments/assets/e2f9690d-3d1d-47a8-8834-428925d3f999" />
 
 ## Technical Stack
 
