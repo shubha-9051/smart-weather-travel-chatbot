@@ -17,7 +17,6 @@ export const useChatStore = create<ChatState>()(
                     const newMessages = [...state.messages, message];
                     const sessions = [...state.sessions];
 
-                    // Update or create current session
                     if (state.currentSessionId) {
                         const sessionIndex = sessions.findIndex(s => s.id === state.currentSessionId);
                         if (sessionIndex !== -1) {
@@ -29,7 +28,6 @@ export const useChatStore = create<ChatState>()(
                             };
                         }
                     } else {
-                        // Create new session if none exists
                         const newSession: ChatSession = {
                             id: Date.now().toString(),
                             title: message.role === 'user' ? message.content.slice(0, 50) : 'New Chat',

@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     }
 
     try {
-        // 1. Text Search to get Place ID
+
         const searchRes = await fetch(
             `https://places.googleapis.com/v1/places:searchText`,
             {
@@ -37,8 +37,7 @@ export async function GET(req: Request) {
 
         const place = searchData.places[0];
 
-        // 2. Construct Photo URLs
-        // https://places.googleapis.com/v1/{name}/media?key={API_KEY}&maxHeightPx=400&maxWidthPx=400
+
         const photos = place.photos?.slice(0, 3).map((photo: any) => {
             return `https://places.googleapis.com/v1/${photo.name}/media?key=${API_KEY}&maxHeightPx=400&maxWidthPx=600`;
         }) || [];

@@ -43,7 +43,6 @@ export async function POST(req: Request) {
     const { messages, language = 'en' } = await req.json();
     const lastUserMessage = messages[messages.length - 1].content;
 
-    // Language-specific system prompts
     const SYSTEM_PROMPT_EN = `
 You are a travel magazine writer and expert Japan travel assistant.
 
@@ -122,43 +121,37 @@ You are a travel magazine writer and expert Japan travel assistant.
 
     const SYSTEM_PROMPT = language === 'ja' ? SYSTEM_PROMPT_JA : SYSTEM_PROMPT_EN;
 
-    // Step 1: Extract Location (Simple heuristic or LLM call)
-    // For robustness, let's do a quick LLM call to extract location
     const locationCompletion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: "Extract the city or region from the user's travel query. ALWAYS return the location name in ENGLISH (romanized), even if the input is in Japanese. For example: '東京' -> 'Tokyo', '京都' -> 'Kyoto', '大阪' -> 'Osaka', '北海道' -> 'Hokkaido', '沖縄' -> 'Okinawa'. Return ONLY the English city/region name, nothing else. If no location found, return 'null'." },
         { role: "user", content: lastUserMessage }
       ],
-      model: "openai/gpt-oss-20b", // Better model for translation
+      model: "openai/gpt-oss-20b",
     });
     const locationCandidate = locationCompletion.choices[0]?.message?.content?.trim();
-    console.log('🔍 Location extraction:', { input: lastUserMessage, extracted: locationCandidate });
+    console.log(' Location extraction:', { input: lastUserMessage, extracted: locationCandidate });
 
     let weatherContext = "";
     let weatherData = null;
 
-    // Step 2: Fetch Weather if location found and not 'null'
     if (locationCandidate && locationCandidate.toLowerCase() !== 'null') {
       try {
-        // Geocoding
         console.log('🌍 Geocoding location:', locationCandidate);
         const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationCandidate)}&count=1&language=en&format=json`);
         const geoJson = await geoRes.json();
-        console.log('📍 Geocoding result:', geoJson);
+        console.log(' Geocoding result:', geoJson);
 
         if (geoJson.results && geoJson.results.length > 0) {
           const { latitude, longitude, name } = geoJson.results[0];
-          console.log('✅ Found location:', { name, latitude, longitude });
+          console.log(' Found location:', { name, latitude, longitude });
 
-          // Weather
           const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`);
           const weatherJson = await weatherRes.json();
-          console.log('🌤️ Weather data:', weatherJson);
+          console.log(' Weather data:', weatherJson);
 
           const temp = weatherJson.current.temperature_2m;
           const code = weatherJson.current.weather_code;
 
-          // Simple code map
           let condition = "Unknown";
           if (code === 0) condition = "Clear";
           else if (code <= 3) condition = "Cloudy";
@@ -166,23 +159,22 @@ You are a travel magazine writer and expert Japan travel assistant.
 
           weatherContext = `Current Weather in ${name}: ${temp}°C, ${condition}.`;
           weatherData = { location: name, temperature: temp, condition };
-          console.log('✅ Weather context created:', weatherContext);
+          console.log(' Weather context created:', weatherContext);
         } else {
-          console.log('❌ No geocoding results found for:', locationCandidate);
+          console.log(' No geocoding results found for:', locationCandidate);
         }
       } catch (e) {
         console.error("Weather fetch error:", e);
       }
     }
 
-    // Step 3: Generate Itinerary
     const completion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: SYSTEM_PROMPT + (weatherContext ? `\n\n${weatherContext}` : "") },
         ...messages
       ],
       model: "openai/gpt-oss-20b",
-      response_format: { type: "json_object" }, // Keep JSON mode for structured responses
+      response_format: { type: "json_object" },
     });
 
     const content = completion.choices[0]?.message?.content;
@@ -190,19 +182,14 @@ You are a travel magazine writer and expert Japan travel assistant.
 
     console.log("LLM Raw Response:", content.substring(0, 200) + "...");
 
-    // Try to parse as JSON
     try {
-      // Extract JSON if wrapped in markdown code blocks or has extra text
       let jsonContent = content.trim();
-
-      // Remove markdown code blocks if present
       if (jsonContent.startsWith('```json')) {
         jsonContent = jsonContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
       } else if (jsonContent.startsWith('```')) {
         jsonContent = jsonContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
       }
 
-      // Try to find JSON object if there's extra text
       const jsonMatch = jsonContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         jsonContent = jsonMatch[0];
@@ -213,7 +200,6 @@ You are a travel magazine writer and expert Japan travel assistant.
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
       console.log("Failed content:", content);
-      // If parsing fails, return error
       return NextResponse.json({
         response: "I apologize, but I encountered an error processing your request. Please try rephrasing your question.",
         recommendations: [],

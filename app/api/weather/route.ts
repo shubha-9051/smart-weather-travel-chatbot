@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     }
 
     try {
-        // 1. Geocoding to get lat/lon
+
         const geoRes = await fetch(
             `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`
         );
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
         const { latitude, longitude, name, country } = geoData.results[0];
 
-        // 2. Fetch Weather
+
         const weatherRes = await fetch(
             `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`
         );
@@ -29,7 +29,6 @@ export async function GET(req: Request) {
 
         const current = weatherData.current;
 
-        // Simple weather code mapping (can be expanded)
         const getWeatherCondition = (code: number) => {
             if (code === 0) return "Clear sky";
             if (code >= 1 && code <= 3) return "Partly cloudy";

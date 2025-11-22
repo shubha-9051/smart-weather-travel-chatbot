@@ -3,7 +3,6 @@ export interface Recommendation {
     description: string;
     location: string;
     main_points?: string[];
-    // Magazine-style sections
     overview?: string;
     best_features?: string[];
     insider_tips?: string[];

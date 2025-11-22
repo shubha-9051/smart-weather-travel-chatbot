@@ -17,7 +17,6 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
     const isUser = message.role === 'user';
     const { language } = useChatStore();
 
-    // UI Labels based on language
     const labels = language === 'ja' ? {
         you: 'あなた',
         assistant: '旅行アシスタント',
@@ -57,21 +56,18 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
                     <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
 
-                {/* Recommendations List */}
                 {message.recommendations && message.recommendations.length > 0 && (
                     <div className="mt-4 flex flex-col gap-6">
                         {message.recommendations.map((rec, idx) => (
                             <div key={idx} className="flex flex-col gap-3">
                                 <PlaceCard query={`${rec.name} ${rec.location}`} />
 
-                                {/* Expanded Info Section */}
                                 <div className="bg-neutral-800/50 p-4 rounded-lg border border-neutral-700/50 space-y-4">
                                     <div>
                                         <div className="font-bold text-lg text-blue-400">{rec.name}</div>
                                         <div className="text-sm text-neutral-400">{rec.location}</div>
                                     </div>
 
-                                    {/* Overview */}
                                     {rec.overview && (
                                         <div>
                                             <div className="flex items-center gap-2 text-sm font-semibold text-neutral-300 mb-2">
@@ -82,7 +78,6 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
                                         </div>
                                     )}
 
-                                    {/* Best Features */}
                                     {rec.best_features && rec.best_features.length > 0 && (
                                         <div>
                                             <div className="flex items-center gap-2 text-sm font-semibold text-neutral-300 mb-2">
@@ -97,7 +92,6 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
                                         </div>
                                     )}
 
-                                    {/* Insider Tips */}
                                     {rec.insider_tips && rec.insider_tips.length > 0 && (
                                         <div>
                                             <div className="flex items-center gap-2 text-sm font-semibold text-neutral-300 mb-2">
@@ -112,7 +106,6 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
                                         </div>
                                     )}
 
-                                    {/* Weather Reasoning */}
                                     {rec.weather_reasoning && (
                                         <div className="bg-blue-900/20 p-3 rounded-lg border border-blue-700/30">
                                             <div className="flex items-center gap-2 text-sm font-semibold text-blue-300 mb-2">
@@ -123,7 +116,6 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
                                         </div>
                                     )}
 
-                                    {/* What to Wear */}
                                     {rec.what_to_wear && rec.what_to_wear.length > 0 && (
                                         <div className="bg-purple-900/20 p-3 rounded-lg border border-purple-700/30">
                                             <div className="flex items-center gap-2 text-sm font-semibold text-purple-300 mb-2">
@@ -143,13 +135,11 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
                     </div>
                 )}
 
-                {/* Widgets */}
                 <div className="flex flex-wrap gap-4 mt-4">
                     {message.weather && <WeatherCard data={message.weather} />}
                     {message.location && <MapPreview location={message.location} />}
                 </div>
 
-                {/* Summary & Tips - MOVED TO BOTTOM */}
                 {!isUser && (
                     <SummaryCard
                         summary={message.summary}
@@ -158,7 +148,6 @@ export default function MessageItem({ message, onSuggestionClick }: { message: M
                     />
                 )}
 
-                {/* Follow-up Questions */}
                 {message.follow_up_questions && message.follow_up_questions.length > 0 && (
                     <div className="mt-4 flex flex-wrap gap-2">
                         {message.follow_up_questions.map((q, idx) => (

@@ -44,7 +44,6 @@ export default function PlaceCard({ query }: PlaceCardProps) {
 
     return (
         <div className="bg-neutral-800 rounded-xl overflow-hidden mt-3 border border-neutral-700 shadow-lg">
-            {/* Photo Carousel */}
             <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide h-48">
                 {data.photos.length > 0 ? (
                     data.photos.map((photo, idx) => (

@@ -23,7 +23,6 @@ export default function Home() {
     setLoading(true);
 
     try {
-      // 1. Send to LLM
       const chatRes = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -38,7 +37,6 @@ export default function Home() {
 
       let weatherData: WeatherData | undefined;
 
-      // 2. Fetch Weather if location is present
       if (chatData.location) {
         try {
           const weatherRes = await fetch(`/api/weather?location=${encodeURIComponent(chatData.location)}`);
@@ -93,7 +91,6 @@ export default function Home() {
       const data = await res.json();
 
       if (data.text) {
-        // Send the transcribed text as a message
         await handleSendMessage(data.text);
       }
     } catch (error) {
