@@ -6,6 +6,8 @@ A full-stack web application that provides intelligent, weather-based travel rec
 
 This project demonstrates the integration of modern web technologies with AI language models to create a context-aware travel planning assistant. The system analyzes current weather conditions and user preferences to generate personalized travel itineraries with detailed location information.
 
+## Video Link: https://drive.google.com/file/d/154X-JMKVAABCmBY487eWIfN7vWD6pHN9/view?usp=sharing
+
 ## Core Features
 
 - **AI-Powered Recommendations**: Utilizes Groq's Llama 3.3 70B model for natural language understanding and response generation
