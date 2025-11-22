@@ -12,7 +12,7 @@ You can understand Japanese voice input (transcribed) and English text.
 **Goal**: Provide a travel itinerary or advice based on the user's query and the CURRENT WEATHER (if provided).
 
 **Rules**:
-1. **Weather-Aware**: If weather data is provided, use it! 
+1. **Weather-Aware**: If weather data is provided, use it!
    - If raining -> suggest indoor activities (museums, arcades, cafes).
    - If hot -> suggest light clothes, hydration, indoor/shaded spots.
    - If cold -> suggest warm clothes, hot pot (nabe), onsens.
@@ -23,9 +23,9 @@ You can understand Japanese voice input (transcribed) and English text.
 {
   "response": "Conversational response explaining your reasoning. Explicitly mention why these places were chosen based on the weather (e.g., 'Since it's raining, I've selected indoor spots...').",
   "recommendations": [
-    { 
-      "name": "Place Name", 
-      "description": "Why visit here?", 
+    {
+      "name": "Place Name",
+      "description": "Why visit here?",
       "location": "City/Area",
       "main_points": ["Point 1", "Point 2", "Point 3"]
     }
@@ -40,7 +40,7 @@ You can understand Japanese voice input (transcribed) and English text.
 
 export async function POST(req: Request) {
   try {
-    const { messages, language = 'en' } = await req.json();
+    const { messages, language = "en" } = await req.json();
     const lastUserMessage = messages[messages.length - 1].content;
 
     const SYSTEM_PROMPT_EN = `
@@ -119,35 +119,48 @@ You are a travel magazine writer and expert Japan travel assistant.
 **言語**: 日本語
 `;
 
-    const SYSTEM_PROMPT = language === 'ja' ? SYSTEM_PROMPT_JA : SYSTEM_PROMPT_EN;
+    const SYSTEM_PROMPT =
+      language === "ja" ? SYSTEM_PROMPT_JA : SYSTEM_PROMPT_EN;
 
     const locationCompletion = await groq.chat.completions.create({
       messages: [
-        { role: "system", content: "Extract the city or region from the user's travel query. ALWAYS return the location name in ENGLISH (romanized), even if the input is in Japanese. For example: '東京' -> 'Tokyo', '京都' -> 'Kyoto', '大阪' -> 'Osaka', '北海道' -> 'Hokkaido', '沖縄' -> 'Okinawa'. Return ONLY the English city/region name, nothing else. If no location found, return 'null'." },
-        { role: "user", content: lastUserMessage }
+        {
+          role: "system",
+          content:
+            "Extract the city or region from the user's travel query. ALWAYS return the location name in ENGLISH (romanized), even if the input is in Japanese. For example: '東京' -> 'Tokyo', '京都' -> 'Kyoto', '大阪' -> 'Osaka', '北海道' -> 'Hokkaido', '沖縄' -> 'Okinawa'. Return ONLY the English city/region name, nothing else. If no location found, return 'null'.",
+        },
+        { role: "user", content: lastUserMessage },
       ],
-      model: "openai/gpt-oss-20b",
+      model: "openai/gpt-oss-120b",
     });
-    const locationCandidate = locationCompletion.choices[0]?.message?.content?.trim();
-    console.log(' Location extraction:', { input: lastUserMessage, extracted: locationCandidate });
+    const locationCandidate =
+      locationCompletion.choices[0]?.message?.content?.trim();
+    console.log(" Location extraction:", {
+      input: lastUserMessage,
+      extracted: locationCandidate,
+    });
 
     let weatherContext = "";
     let weatherData = null;
 
-    if (locationCandidate && locationCandidate.toLowerCase() !== 'null') {
+    if (locationCandidate && locationCandidate.toLowerCase() !== "null") {
       try {
-        console.log('🌍 Geocoding location:', locationCandidate);
-        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationCandidate)}&count=1&language=en&format=json`);
+        console.log("🌍 Geocoding location:", locationCandidate);
+        const geoRes = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationCandidate)}&count=1&language=en&format=json`,
+        );
         const geoJson = await geoRes.json();
-        console.log(' Geocoding result:', geoJson);
+        console.log(" Geocoding result:", geoJson);
 
         if (geoJson.results && geoJson.results.length > 0) {
           const { latitude, longitude, name } = geoJson.results[0];
-          console.log(' Found location:', { name, latitude, longitude });
+          console.log(" Found location:", { name, latitude, longitude });
 
-          const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`);
+          const weatherRes = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`,
+          );
           const weatherJson = await weatherRes.json();
-          console.log(' Weather data:', weatherJson);
+          console.log(" Weather data:", weatherJson);
 
           const temp = weatherJson.current.temperature_2m;
           const code = weatherJson.current.weather_code;
@@ -159,9 +172,9 @@ You are a travel magazine writer and expert Japan travel assistant.
 
           weatherContext = `Current Weather in ${name}: ${temp}°C, ${condition}.`;
           weatherData = { location: name, temperature: temp, condition };
-          console.log(' Weather context created:', weatherContext);
+          console.log(" Weather context created:", weatherContext);
         } else {
-          console.log(' No geocoding results found for:', locationCandidate);
+          console.log(" No geocoding results found for:", locationCandidate);
         }
       } catch (e) {
         console.error("Weather fetch error:", e);
@@ -170,10 +183,14 @@ You are a travel magazine writer and expert Japan travel assistant.
 
     const completion = await groq.chat.completions.create({
       messages: [
-        { role: "system", content: SYSTEM_PROMPT + (weatherContext ? `\n\n${weatherContext}` : "") },
-        ...messages
+        {
+          role: "system",
+          content:
+            SYSTEM_PROMPT + (weatherContext ? `\n\n${weatherContext}` : ""),
+        },
+        ...messages,
       ],
-      model: "openai/gpt-oss-20b",
+      model: "openai/gpt-oss-120b",
       response_format: { type: "json_object" },
     });
 
@@ -184,10 +201,12 @@ You are a travel magazine writer and expert Japan travel assistant.
 
     try {
       let jsonContent = content.trim();
-      if (jsonContent.startsWith('```json')) {
-        jsonContent = jsonContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (jsonContent.startsWith('```')) {
-        jsonContent = jsonContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      if (jsonContent.startsWith("```json")) {
+        jsonContent = jsonContent
+          .replace(/^```json\s*/, "")
+          .replace(/\s*```$/, "");
+      } else if (jsonContent.startsWith("```")) {
+        jsonContent = jsonContent.replace(/^```\s*/, "").replace(/\s*```$/, "");
       }
 
       const jsonMatch = jsonContent.match(/\{[\s\S]*\}/);
@@ -201,16 +220,19 @@ You are a travel magazine writer and expert Japan travel assistant.
       console.error("JSON parse error:", parseError);
       console.log("Failed content:", content);
       return NextResponse.json({
-        response: "I apologize, but I encountered an error processing your request. Please try rephrasing your question.",
+        response:
+          "I apologize, but I encountered an error processing your request. Please try rephrasing your question.",
         recommendations: [],
         location: "",
         summary: "",
-        follow_up_questions: []
+        follow_up_questions: [],
       });
     }
-
   } catch (error) {
     console.error("Error in chat API:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
