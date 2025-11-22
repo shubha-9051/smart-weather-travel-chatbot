@@ -129,7 +129,7 @@ You are a travel magazine writer and expert Japan travel assistant.
         { role: "system", content: "Extract the city or region from the user's travel query. ALWAYS return the location name in ENGLISH (romanized), even if the input is in Japanese. For example: '東京' -> 'Tokyo', '京都' -> 'Kyoto', '大阪' -> 'Osaka', '北海道' -> 'Hokkaido', '沖縄' -> 'Okinawa'. Return ONLY the English city/region name, nothing else. If no location found, return 'null'." },
         { role: "user", content: lastUserMessage }
       ],
-      model: "llama-3.3-70b-versatile", // Better model for translation
+      model: "openai/gpt-oss-20b", // Better model for translation
     });
     const locationCandidate = locationCompletion.choices[0]?.message?.content?.trim();
     console.log('🔍 Location extraction:', { input: lastUserMessage, extracted: locationCandidate });
@@ -181,7 +181,7 @@ You are a travel magazine writer and expert Japan travel assistant.
         { role: "system", content: SYSTEM_PROMPT + (weatherContext ? `\n\n${weatherContext}` : "") },
         ...messages
       ],
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-20b",
       response_format: { type: "json_object" }, // Keep JSON mode for structured responses
     });
 
